@@ -17,7 +17,17 @@ class QRScannerController: UIViewController {
     var captureSession:AVCaptureSession?
     var videoPreviewLayer:AVCaptureVideoPreviewLayer?
     var qrCodeFrameView:UIView?
-    
+    var supportedCodeTypes = [AVMetadataObjectTypeQRCode,
+                              AVMetadataObjectTypeUPCECode,
+                              AVMetadataObjectTypeCode39Code,
+                              AVMetadataObjectTypeCode39Mod43Code,
+                              AVMetadataObjectTypeCode93Code,
+                              AVMetadataObjectTypeCode128Code,
+                              AVMetadataObjectTypeEAN8Code,
+                              AVMetadataObjectTypeAztecCode,
+                              AVMetadataObjectTypeEAN13Code,
+                              AVMetadataObjectTypePDF417Code]
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,10 +50,7 @@ class QRScannerController: UIViewController {
             
             //设置delegate并使用默认的dispatch 队列来执行回调
             captureMetadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
-            captureMetadataOutput.metadataObjectTypes = [AVMetadataObjectTypeQRCode,AVMetadataObjectTypeUPCECode,
-                AVMetadataObjectTypeCode39Code,
-            AVMetadataObjectTypeCode39Mod43Code,AVMetadataObjectTypeCode93Code,AVMetadataObjectTypeCode128Code,AVMetadataObjectTypeEAN8Code,AVMetadataObjectTypeAztecCode,AVMetadataObjectTypeEAN13Code,AVMetadataObjectTypePDF417Code]
-            
+            captureMetadataOutput.metadataObjectTypes = supportedCodeTypes
             
             //初始化视频预览layer ，并将其作为viewPreview 的 sublayer
             videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
@@ -95,7 +102,7 @@ extension QRScannerController:AVCaptureMetadataOutputObjectsDelegate{
         
         //获取元数据对象
         let metadataObj = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
-        if metadataObj.type == AVMetadataObjectTypeQRCode{
+        if supportedCodeTypes.contains(metadataObj.type){
             //如果元数据是二维码，则更新二维码选择框大小与label 的文本
             let barCodeObject = videoPreviewLayer?.transformedMetadataObject(for: metadataObj)
             qrCodeFrameView?.frame = (barCodeObject?.bounds)!
